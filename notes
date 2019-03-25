@@ -1,0 +1,9 @@
+to get console logs to work
+set CI=true && react-scripts test
+
+
+resources
+https://github.com/facebook/create-react-app/issues/1368
+https://airbnb.io/enzyme/docs/api/ReactWrapper/first.html
+https://github.com/learn-co-students/react-initial-state-lab-v-000/blob/master/test/index-test.js
+https://github.com/jd2rogers2/react-simple-state-lab-v-000/blob/master/test/1-Cell.test.js

@@ -31,3 +31,17 @@
     transform: rotate(360deg);
   }
 }
+
+table, th, td {
+  border: 1px solid black;
+}
+
+table {
+  margin: 0px auto;
+  width: 50%;
+}
+
+td {
+  height: 200px;
+  width: 200px;
+}
