@@ -14,6 +14,10 @@ const WIN_COMBOS = [
   [2, 4, 6]
 ];
 
+// 2 player and computer player features
+// saved games
+// 
+
 class App extends Component {
 
   constructor() {
