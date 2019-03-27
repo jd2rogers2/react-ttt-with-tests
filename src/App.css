@@ -1,5 +1,7 @@
 .App {
   text-align: center;
+  margin: 0px auto;
+  width: 50%;
 }
 
 .App-logo {
@@ -36,12 +38,17 @@ table, th, td {
   border: 1px solid black;
 }
 
-table {
+.overlay {
+  position: absolute;
   margin: 0px auto;
-  width: 50%;
+  left: 200px;
+  right: 200px;
+  top: 300px;
+  background-color: rgba(244,40,40,1);
+  padding: 20px;
 }
 
 td {
-  height: 200px;
-  width: 200px;
+  height: 150px;
+  width: 150px;
 }

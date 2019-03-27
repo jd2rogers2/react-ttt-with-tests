@@ -23,11 +23,13 @@ class App extends Component {
       currentPlayer: 'X',
       winner: false,
       isOver: false,
-      // previousGames: [],
+      previousGames: {},
       isTwoPlayer: true,
-      // currentGameId: 0,
+      currentGameId: 0,
     };
   }
+
+// taking a break in the middle of building out save game functionality
 
   onTileClick = index => {
     this.setState(prevState => {
@@ -75,11 +77,49 @@ class App extends Component {
 
   isFull = board => board.every(space => space !== '');
   togglePlayer2 = () => this.setState(prevState => ({isTwoPlayer: !prevState.isTwoPlayer}));
+  getCurrent = board => board.filter(space => space !== '').length % 2 ? 'O' : 'X';
+
+  newGame = index => {
+    if (index) {
+      this.setState(prevState => {
+        const newPrevGames = [...prevState.previousGames, {board: prevState.board, isTwoPlayer: prevState.isTwoPlayer}];
+        const newBoard = prevState.previousGames[index].board;
+        const winner = this.winner(newBoard);
+        return {previousGames: newPrevGames,
+                currentGameId: index,
+                board: newBoard,
+                winner,
+                isTwoPlayer: prevState.previousGames[index].isTwoPlayer,
+                isOver: winner || this.isFull(newBoard),
+                currentPlayer: this.getCurrent(newBoard)
+               };
+      });
+    } else {
+      this.setState(prevState => {
+        return {
+          board: ['', '', '', '', '', '', '', '', ''],
+          currentPlayer: 'X',
+          winner: false,
+          isOver: false,
+          previousGames: [],
+          isTwoPlayer: true,
+          currentGameId: 0,
+        };
+      });
+    }
+  }
 
 //         <Board onTileClick={this.onTileClick} board={this.state.board} />
   render() {
     return (
       <div className="App">
+        <button onClick={() => this.newGame()}>Start a new game!</button>
+        {this.state.isOver && this.state.winner && (
+          <div className="overlay">The winner is {this.state.winner}!</div>
+        )}
+        {this.state.isOver && !this.state.winner && (
+          <div className="overlay">Tie Game!</div>
+        )}
         <table>
           <tbody>
             <tr>
@@ -102,6 +142,9 @@ class App extends Component {
         <div>
           <p>currently playing against: {this.state.isTwoPlayer ? 'Player 2' : 'Computer'}</p>
           {this.state.board.every(spot => spot === '') && <button className="togglePlayer2" onClick={() => this.togglePlayer2()}>toggle</button>}
+          {this.state.isTwoPlayer && <p>current player: {this.state.currentPlayer}</p>}
+          <p>continue a previous game</p>
+          {this.state.previousGames.map((game, index) => (<button key={index} onClick={() => this.newGame(index)}>{index}</button>))}
         </div>
       </div>
     );
