@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
-import Board from './components/board';
+// import Board from './components/board';
 
 const WIN_COMBOS = [
   [0, 1, 2],
@@ -14,10 +14,6 @@ const WIN_COMBOS = [
   [2, 4, 6]
 ];
 
-// 2 player and computer player features
-// saved games
-//
-
 class App extends Component {
 
   constructor() {
@@ -28,7 +24,7 @@ class App extends Component {
       winner: false,
       isOver: false,
       // previousGames: [],
-      // isTwoPlayer: true,
+      isTwoPlayer: true,
       // currentGameId: 0,
     };
   }
@@ -38,18 +34,33 @@ class App extends Component {
       let newPlayer = prevState.currentPlayer;
       let newBoard = [...prevState.board];
 
-      if (newBoard[index] === '') {
+      if (!prevState.isOver && newBoard[index] === '') {
         newBoard[index] = prevState.currentPlayer;
-        newPlayer = prevState.currentPlayer === 'O' ? 'X' : 'O';
+        if (!prevState.isTwoPlayer) {
+          newBoard = this.compMove(newBoard);
+        } else {
+          newPlayer = prevState.currentPlayer === 'O' ? 'X' : 'O';
+        }
       }
 
-      return {board: newBoard, currentPlayer: newPlayer};
+      const winner = this.winner(newBoard);
+      return {winner,
+              board: newBoard,
+              currentPlayer: newPlayer,
+              isOver: winner || this.isFull(newBoard)
+            };
     });
-    this.setState({winner: this.winner(), isOver: this.winner() || this.isFull()});
   }
 
-  winner = () => {
-    const {board} = this.state;
+  compMove = board => {
+    const empty = board.indexOf('');
+    if (empty !== -1) {
+      board[empty] = 'O';
+    }
+    return board;
+  }
+
+  winner = board => {
     let winner = false;
     WIN_COMBOS.forEach(combo => {
       if (board[combo[0]] !== '' &&
@@ -62,30 +73,36 @@ class App extends Component {
     return winner;
   }
 
-// console.log(this.state.board);
-  isFull = () => this.state.board.every(space => space !== '');
+  isFull = board => board.every(space => space !== '');
+  togglePlayer2 = () => this.setState(prevState => ({isTwoPlayer: !prevState.isTwoPlayer}));
 
 //         <Board onTileClick={this.onTileClick} board={this.state.board} />
   render() {
     return (
       <div className="App">
         <table>
-          <tr>
-            <td onClick={() => this.onTileClick(0)}>{this.state.board[0]}</td>
-            <td onClick={() => this.onTileClick(1)}>{this.state.board[1]}</td>
-            <td onClick={() => this.onTileClick(2)}>{this.state.board[2]}</td>
-          </tr>
-          <tr>
-            <td onClick={() => this.onTileClick(3)}>{this.state.board[3]}</td>
-            <td onClick={() => this.onTileClick(4)}>{this.state.board[4]}</td>
-            <td onClick={() => this.onTileClick(5)}>{this.state.board[5]}</td>
-          </tr>
-          <tr>
-            <td onClick={() => this.onTileClick(6)}>{this.state.board[6]}</td>
-            <td onClick={() => this.onTileClick(7)}>{this.state.board[7]}</td>
-            <td onClick={() => this.onTileClick(8)}>{this.state.board[8]}</td>
-          </tr>
+          <tbody>
+            <tr>
+              <td onClick={() => this.onTileClick(0)}>{this.state.board[0]}</td>
+              <td onClick={() => this.onTileClick(1)}>{this.state.board[1]}</td>
+              <td onClick={() => this.onTileClick(2)}>{this.state.board[2]}</td>
+            </tr>
+            <tr>
+              <td onClick={() => this.onTileClick(3)}>{this.state.board[3]}</td>
+              <td onClick={() => this.onTileClick(4)}>{this.state.board[4]}</td>
+              <td onClick={() => this.onTileClick(5)}>{this.state.board[5]}</td>
+            </tr>
+            <tr>
+              <td onClick={() => this.onTileClick(6)}>{this.state.board[6]}</td>
+              <td onClick={() => this.onTileClick(7)}>{this.state.board[7]}</td>
+              <td onClick={() => this.onTileClick(8)}>{this.state.board[8]}</td>
+            </tr>
+          </tbody>
         </table>
+        <div>
+          <p>currently playing against: {this.state.isTwoPlayer ? 'Player 2' : 'Computer'}</p>
+          {this.state.board.every(spot => spot === '') && <button className="togglePlayer2" onClick={() => this.togglePlayer2()}>toggle</button>}
+        </div>
       </div>
     );
   }

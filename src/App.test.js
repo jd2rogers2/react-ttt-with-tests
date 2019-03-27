@@ -37,11 +37,13 @@ describe('<App>', () => {
     app.find('td').at(2).simulate('click');
     expect(app.state('winner')).to.equal('X');
 
-    app.setState({board: ['X', 'X', '', 'O', 'O', '', '', '', '']});
+    app.setState({board: ['X', 'X', '', 'O', 'O', '', '', '', ''], isOver: false});
+    // console.log(app.find('td').at(5).debug());
     app.find('td').at(5).simulate('click');
+    // console.log(app.find('td').at(5).debug());
     expect(app.state('winner')).to.equal('O');
 
-    app.setState({board: ['X', 'X', '', 'O', 'O', '', '', '', '']});
+    app.setState({board: ['X', 'X', '', 'O', 'O', '', '', '', ''], isOver: false});
     app.find('td').at(8).simulate('click');
     expect(app.state('winner')).to.equal(false);
   });
@@ -49,12 +51,30 @@ describe('<App>', () => {
   it('knows when the game is full', () => {
     const app = shallow(<App />);
 
-    app.setState({board: ['X', 'X', 'O', 'O', 'O', 'X', 'X', 'O', 'X']});
-      app.find('td').at(8).simulate('click');
+    app.setState({board: ['X', 'X', 'O', 'O', 'O', 'X', 'X', 'O', ''], isOver: false});
+    app.find('td').at(8).simulate('click');
     expect(app.state('isOver')).to.equal(true);
 
-    app.setState({board: ['X', 'X', '', 'O', 'O', '', '', '', '']});
-      app.find('td').at(8).simulate('click');
+    app.setState({board: ['X', 'X', '', 'O', 'O', '', '', '', ''], isOver: false});
+    app.find('td').at(8).simulate('click');
     expect(app.state('isOver')).to.equal(false);
+  });
+
+  it("shows the toggle player 2 button when a game isn't started", () => {
+    const app = shallow(<App />);
+
+    app.setState({board: ['', '', '', '', '', '', '', '', '']});
+    expect(app.exists('button.togglePlayer2')).to.equal(true);
+
+    app.setState({board: ['X', '', '', '', '', '', '', '', '']});
+    expect(app.exists('button.togglePlayer2')).to.equal(false);
+  });
+
+  it("computer takes a turn if two player is toggled off", () => {
+    const app = shallow(<App />);
+
+    app.setState({board: ['', '', '', '', '', '', '', '', ''], isTwoPlayer: false});
+    app.find('td').last().simulate('click');
+    expect(app.state('board')[0]).to.equal('O');
   });
 });
