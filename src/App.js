@@ -16,7 +16,7 @@ const WIN_COMBOS = [
 
 // 2 player and computer player features
 // saved games
-// 
+//
 
 class App extends Component {
 
@@ -24,32 +24,46 @@ class App extends Component {
     super();
     this.state = {
       board: ['', '', '', '', '', '', '', '', ''],
-      currentPlayer: 'X'
+      currentPlayer: 'X',
+      winner: false,
+      isOver: false,
+      // previousGames: [],
+      // isTwoPlayer: true,
+      // currentGameId: 0,
     };
   }
 
   onTileClick = index => {
     this.setState(prevState => {
-      const newBoard = [...prevState.board];
-      newBoard[index] = prevState.currentPlayer;
-      const newPlayer = prevState.currentPlayer === 'O' ? 'X' : 'O';
+      let newPlayer = prevState.currentPlayer;
+      let newBoard = [...prevState.board];
+
+      if (newBoard[index] === '') {
+        newBoard[index] = prevState.currentPlayer;
+        newPlayer = prevState.currentPlayer === 'O' ? 'X' : 'O';
+      }
+
       return {board: newBoard, currentPlayer: newPlayer};
     });
+    this.setState({winner: this.winner(), isOver: this.winner() || this.isFull()});
   }
 
-  isWon = () => {
+  winner = () => {
+    const {board} = this.state;
+    let winner = false;
     WIN_COMBOS.forEach(combo => {
-      if (this.state.board[combo[0]] !== '' &&
-          this.state.board[combo[0]] === this.state.board[combo[1]] &&
-          this.state.board[combo[1]] === this.state.board[combo[2]]
+      if (board[combo[0]] !== '' &&
+          board[combo[0]] === board[combo[1]] &&
+          board[combo[1]] === board[combo[2]]
       ) {
-        return true;
+        winner = board[combo[0]];
       }
     });
-    return false;
+    return winner;
   }
 
-  winner = () => {}
+// console.log(this.state.board);
+  isFull = () => this.state.board.every(space => space !== '');
 
 //         <Board onTileClick={this.onTileClick} board={this.state.board} />
   render() {
