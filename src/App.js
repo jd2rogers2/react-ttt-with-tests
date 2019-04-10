@@ -24,7 +24,7 @@ class App extends Component {
       winner: false,
       isOver: false,
       previousGames: [],
-      // {id: 0, isTwoPlayer: true, board: [blah]}
+      // {id: 1, isTwoPlayer: true, board: [blah]}
       isTwoPlayer: true,
       currentGameId: 1,
       showSavePrompt: false,
@@ -173,7 +173,7 @@ class App extends Component {
             {this.state.showSavePrompt && (
               <div>
                 <p>save previous game?</p>
-                <button onClick={() => this.onPromptclick(true)}>yes</button>
+                <button className="save-and-new" onClick={() => this.onPromptclick(true)}>yes</button>
                 <button onClick={() => this.onPromptclick(false)}>no</button>
               </div>
             )}
@@ -205,13 +205,13 @@ class App extends Component {
           </tbody>
         </table>
         <div>
-          <button onClick={() => this.onNewGameClick()}>Start a new game!</button>
+          <button className="new-game-button" onClick={() => this.onNewGameClick()}>Start a new game!</button>
           <button onClick={() => this.saveGame()}>Save this game</button>
           <p>currently playing against: {this.state.isTwoPlayer ? 'Player 2' : 'Computer'}</p>
           {this.state.board.every(spot => spot === '') && <button className="togglePlayer2" onClick={() => this.togglePlayer2()}>toggle</button>}
           {this.state.isTwoPlayer && <p>current player: {this.state.currentPlayer}</p>}
           {!!this.state.previousGames.length && (
-            <div>
+            <div className="previous-games">
               <p>continue a previous game</p>
               {this.state.previousGames.map(game => (<button key={game.id} onClick={() => this.onPrevGameClick(game.id)}>{game.id}</button>))}
             </div>

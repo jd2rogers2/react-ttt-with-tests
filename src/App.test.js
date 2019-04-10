@@ -77,4 +77,21 @@ describe('<App>', () => {
     app.find('td').last().simulate('click');
     expect(app.state('board')[0]).to.equal('O');
   });
+
+  it("cane save the current game", () => {
+    const app = shallow(<App />);
+    app.find('.new-game-button').last().simulate('click');
+    app.find('.save-and-new').last().simulate('click');
+    expect(app.state('previousGames').length).to.equal(1);
+  });
+
+  it("can recall a previous game", () => {
+    const app = shallow(<App />);
+
+    const oldBoard = ['X', 'O', 'X', '', '', '', '', '', ''];
+    app.setState({currentGameId: 2, previousGames: [{id: 1, isTwoPlayer: true, board: oldBoard}]});
+    app.find('.previous-games button').last().simulate('click');
+    app.find('.save-and-new').last().simulate('click');
+    expect(app.state('board')).to.equal(oldBoard);
+  });
 });
