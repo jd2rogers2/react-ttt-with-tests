@@ -52,3 +52,7 @@ td {
   height: 150px;
   width: 150px;
 }
+
+.messages {
+  border: solid 1px red;
+}

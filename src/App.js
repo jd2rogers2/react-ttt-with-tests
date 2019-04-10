@@ -23,15 +23,18 @@ class App extends Component {
       currentPlayer: 'X',
       winner: false,
       isOver: false,
-      previousGames: {},
+      previousGames: [],
+      // {id: 0, isTwoPlayer: true, board: [blah]}
       isTwoPlayer: true,
-      currentGameId: 0,
+      currentGameId: 1,
+      showSavePrompt: false,
+      previousGameId: null
     };
   }
 
-// taking a break in the middle of building out save game functionality
-
   onTileClick = index => {
+    if (this.state.showSavePrompt) {return;}
+
     this.setState(prevState => {
       let newPlayer = prevState.currentPlayer;
       let newBoard = [...prevState.board];
@@ -46,6 +49,11 @@ class App extends Component {
       }
 
       const winner = this.winner(newBoard);
+
+      if (winner) {
+        this.saveGame();
+      }
+
       return {winner,
               board: newBoard,
               currentPlayer: newPlayer,
@@ -76,49 +84,106 @@ class App extends Component {
   }
 
   isFull = board => board.every(space => space !== '');
-  togglePlayer2 = () => this.setState(prevState => ({isTwoPlayer: !prevState.isTwoPlayer}));
+  togglePlayer2 = () => {
+    if (this.state.showSavePrompt) {return;}
+    this.setState(prevState => ({isTwoPlayer: !prevState.isTwoPlayer}));
+  }
   getCurrent = board => board.filter(space => space !== '').length % 2 ? 'O' : 'X';
 
-  newGame = index => {
-    if (index) {
-      this.setState(prevState => {
-        const newPrevGames = [...prevState.previousGames, {board: prevState.board, isTwoPlayer: prevState.isTwoPlayer}];
-        const newBoard = prevState.previousGames[index].board;
-        const winner = this.winner(newBoard);
-        return {previousGames: newPrevGames,
-                currentGameId: index,
-                board: newBoard,
-                winner,
-                isTwoPlayer: prevState.previousGames[index].isTwoPlayer,
-                isOver: winner || this.isFull(newBoard),
-                currentPlayer: this.getCurrent(newBoard)
-               };
-      });
-    } else {
-      this.setState(prevState => {
-        return {
-          board: ['', '', '', '', '', '', '', '', ''],
-          currentPlayer: 'X',
-          winner: false,
-          isOver: false,
-          previousGames: [],
-          isTwoPlayer: true,
-          currentGameId: 0,
-        };
-      });
-    }
+  startNewGame = () => {
+    if (this.state.showSavePrompt) {return;}
+
+    this.setState(prevState => {
+      return {
+        board: ['', '', '', '', '', '', '', '', ''],
+        currentPlayer: 'X',
+        winner: false,
+        isOver: false,
+        isTwoPlayer: true,
+        currentGameId: prevState.previousGames.length + 1,
+      };
+    });
+  }
+
+  recallGame = id => {
+    if (this.state.showSavePrompt) {return;}
+
+    this.setState(prevState => {
+      const prevGame = prevState.previousGames.find(game => game.id === id);
+      const prevBoard = prevGame.board;
+      const winner = this.winner(prevBoard);
+      return {
+              currentGameId: id,
+              board: prevBoard,
+              winner,
+              isTwoPlayer: prevGame.isTwoPlayer,
+              isOver: winner || this.isFull(prevBoard),
+              currentPlayer: this.getCurrent(prevBoard)
+             };
+    });
+  }
+
+  saveGame = () => {
+    this.setState(prevState => {
+      const existingGame = prevState.previousGames.find(game => game.id === prevState.currentGameId);
+      if (existingGame) {
+        const newPrevGames = prevState.previousGames.map(game => {
+          if (game.id === prevState.currentGameId) {
+            return {...game, board: prevState.board};
+          } else {
+            return game;
+          }
+        });
+
+        return {previousGames: newPrevGames};
+      } else {
+        return {previousGames: [...prevState.previousGames, {id: prevState.previousGames.length + 1, board: prevState.board, isTwoPlayer: prevState.isTwoPlayer}]};
+      }
+    });
+  }
+
+  onNewGameClick = () => {
+    this.setState({showSavePrompt: true});
+  }
+
+  onPromptclick = shouldSave => {
+    this.setState({showSavePrompt: false}, () => {
+      if (shouldSave) {
+        this.saveGame();
+      }
+      if (this.state.previousGameId) {
+        this.recallGame(this.state.previousGameId);
+      } else {
+        this.startNewGame();
+      }
+      this.setState({previousGameId: null});
+    });
+  }
+
+  onPrevGameClick = id => {
+    this.setState({showSavePrompt: true, previousGameId: id});
   }
 
 //         <Board onTileClick={this.onTileClick} board={this.state.board} />
   render() {
     return (
       <div className="App">
-        <button onClick={() => this.newGame()}>Start a new game!</button>
-        {this.state.isOver && this.state.winner && (
-          <div className="overlay">The winner is {this.state.winner}!</div>
-        )}
-        {this.state.isOver && !this.state.winner && (
-          <div className="overlay">Tie Game!</div>
+        {(this.state.isOver || this.state.showSavePrompt) && (
+          <div className="messages">
+            {this.state.showSavePrompt && (
+              <div>
+                <p>save previous game?</p>
+                <button onClick={() => this.onPromptclick(true)}>yes</button>
+                <button onClick={() => this.onPromptclick(false)}>no</button>
+              </div>
+            )}
+            {this.state.isOver && this.state.winner && (
+              <div className="overlay">The winner is {this.state.winner}!</div>
+            )}
+            {this.state.isOver && !this.state.winner && (
+              <div className="overlay">Tie Game!</div>
+            )}
+          </div>
         )}
         <table>
           <tbody>
@@ -140,11 +205,17 @@ class App extends Component {
           </tbody>
         </table>
         <div>
+          <button onClick={() => this.onNewGameClick()}>Start a new game!</button>
+          <button onClick={() => this.saveGame()}>Save this game</button>
           <p>currently playing against: {this.state.isTwoPlayer ? 'Player 2' : 'Computer'}</p>
           {this.state.board.every(spot => spot === '') && <button className="togglePlayer2" onClick={() => this.togglePlayer2()}>toggle</button>}
           {this.state.isTwoPlayer && <p>current player: {this.state.currentPlayer}</p>}
-          <p>continue a previous game</p>
-          {this.state.previousGames.map((game, index) => (<button key={index} onClick={() => this.newGame(index)}>{index}</button>))}
+          {!!this.state.previousGames.length && (
+            <div>
+              <p>continue a previous game</p>
+              {this.state.previousGames.map(game => (<button key={game.id} onClick={() => this.onPrevGameClick(game.id)}>{game.id}</button>))}
+            </div>
+          )}
         </div>
       </div>
     );
